@@ -25,5 +25,5 @@ if __name__ == '__main__':
     strings = opts.strings
 
     for batch in split_every(1000, (s.rstrip() for s in strings)):
-        for string, label in eval_list(batch):
+        for string, label in eval_list(batch, ignore_invalid=True, warnings=True):
             print("{}\t{}".format(string, label))

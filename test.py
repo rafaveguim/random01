@@ -1,6 +1,7 @@
 import numpy as np
 import keras
 import pickle
+import sys
 
 from keras.models import model_from_json
 
@@ -39,11 +40,20 @@ def accuracy(test_set, true_labels):
     return (len(test_set)-error)/len(test_set) # accuracy
 
 
-def eval_list(strings):
+def eval_list(strings, ignore_invalid=False, warnings=False):
     matrix = np.zeros((len(strings), len(vocab)))
     for i, x in enumerate(strings):
         for bigram in bigram_generator(bytes(x, 'utf-8')):
-            j = bigram2ind[bigram]
+            try:
+                j = bigram2ind[bigram]
+            except:
+                if ignore_invalid:
+                    if warnings:
+                        print("Invalid character in string {}".format(x),
+                            file=sys.stderr)
+                    continue
+                else:
+                    raise
             matrix[i][j] = 1
 
     M = model.predict(matrix)

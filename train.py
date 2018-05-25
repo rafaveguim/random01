@@ -7,6 +7,8 @@ from keras.preprocessing.text import Tokenizer
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 
+from itertools import product
+
 training_data = np.genfromtxt(
     '/Volumes/Samsung_T5/data/random01/train.tsv',
     delimiter='\t', usecols=(0,1), dtype=None, comments=None)
@@ -20,17 +22,20 @@ def bigram_generator(x):
 
 # Build the vocabulary
 
+letters = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
+
 bigram2ind = dict()
 vocab      = list()
 vocab_size = 0
-for x in train_x:
-    for bigram in bigram_generator(x): # iterate in pairs
-        if bigram in bigram2ind:
-            continue
-        else:
-            bigram2ind[bigram] = vocab_size
-            vocab.append(bigram)
-            vocab_size += 1
+
+for a, b in product(letters, repeat=2): # iterate in pairs
+    bigram = bytes(a + b, 'utf-8')
+    if bigram in bigram2ind:
+        continue
+    else:
+        bigram2ind[bigram] = vocab_size
+        vocab.append(bigram)
+        vocab_size += 1
 
 # convert strings to index array (one-hot matrix)
 matrix = np.zeros((len(train_x), vocab_size))
