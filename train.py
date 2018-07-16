@@ -9,9 +9,15 @@ from keras.layers import Dense, Dropout, Activation
 
 from itertools import product
 
+# Load the training data
+
 training_data = np.genfromtxt(
     '/Volumes/Samsung_T5/data/random01/train.tsv',
     delimiter='\t', usecols=(0,1), dtype=None, comments=None)
+
+# Decompose training data into two vectors
+# x - input
+# y - labels
 
 train_x = [x[0] for x in training_data]
 train_y = np.asarray([x[1] for x in training_data])
@@ -21,11 +27,14 @@ def bigram_generator(x):
         yield x[i-2:i]
 
 # Build the vocabulary
+# 1. Define observable letters
+# 2. Define observable letter bigrams
+# 3. Build lookup tables
 
 letters = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'
 
-bigram2ind = dict()
-vocab      = list()
+bigram2ind = dict()   # bigram -> index
+vocab      = list()   # index  -> bigram
 vocab_size = 0
 
 for a, b in product(letters, repeat=2): # iterate in pairs
@@ -37,15 +46,15 @@ for a, b in product(letters, repeat=2): # iterate in pairs
         vocab.append(bigram)
         vocab_size += 1
 
-# convert strings to index array (one-hot matrix)
+# Convert strings to index arrays (one-hot matrix)
+
 matrix = np.zeros((len(train_x), vocab_size))
 for i, x in enumerate(train_x):
     for bigram in bigram_generator(x):
         j = bigram2ind[bigram]
         matrix[i][j] = 1
+
 train_x = matrix
-
-
 train_y = keras.utils.to_categorical(train_y, 2)
 
 
